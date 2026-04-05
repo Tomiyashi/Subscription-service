@@ -62,3 +62,31 @@ func (s *SubscriptionService) ListSubscriptions(ctx context.Context, userID uuid
 	}
 	return subs, nil
 }
+
+func (s *SubscriptionService) UpdateSubscription(ctx context.Context, sub *models.Subscription) error {
+	if sub.Price <= 0 {
+		return fmt.Errorf("validation: price must be positive")
+	}
+	if sub.ServiceName == "" {
+		return fmt.Errorf("validation: service_name cannot be empty")
+	}
+	if err := s.repo.Update(ctx, sub); err != nil {
+		return fmt.Errorf("service: update subscription failed: %w", err)
+	}
+	return nil
+}
+
+func (s *SubscriptionService) DeleteSubscription(ctx context.Context, id uuid.UUID) error {
+	if err := s.repo.Delete(ctx, id); err != nil {
+		return fmt.Errorf("service: delete subscription failed: %w", err)
+	}
+	return nil
+}
+
+func (s *SubscriptionService) GetTotalCost(ctx context.Context, userID uuid.UUID, serviceName *string, from, to time.Time) (int, error) {
+	total, err := s.repo.GetTotalCost(ctx, userID, serviceName, from, to)
+	if err != nil {
+		return 0, fmt.Errorf("service: get total cost failed: %w", err)
+	}
+	return total, nil
+}

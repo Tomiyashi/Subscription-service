@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -12,9 +13,9 @@ import (
 )
 
 func InitDB() (*pgxpool.Pool, error) {
-	if err := godotenv.Load(); err != nil {
-		log.Println("Error loading .env file", err)
-		return nil, err
+	envPath := filepath.Join(".", ".env")
+	if err := godotenv.Load(envPath); err != nil {
+		log.Println("⚠️ .env not found, using system environment variables")
 	}
 
 	host := os.Getenv("DB_HOST")
@@ -31,14 +32,13 @@ func InitDB() (*pgxpool.Pool, error) {
 
 	pool, err := pgxpool.New(ctx, dsn)
 	if err != nil {
-		log.Println("Error with pgxpool", err)
-		return nil, err
+		return nil, fmt.Errorf("failed to create connection pool: %w", err)
 	}
 
 	if err := pool.Ping(ctx); err != nil {
+		pool.Close()
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
 	return pool, nil
-
 }

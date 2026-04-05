@@ -22,3 +22,10 @@ type CreateSubscriptionRequest struct {
 	StartDate   time.Time  `json:"start_date"`
 	EndDate     *time.Time `json:"end_date,omitempty"`
 }
+
+type UpdateSubscriptionRequest struct {
+	ServiceName string     `json:"service_name"`
+	Price       int        `json:"price"`
+	StartDate   time.Time  `json:"start_date"`
+	EndDate     *time.Time `json:"end_date,omitempty"`
+}

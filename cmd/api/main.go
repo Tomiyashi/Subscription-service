@@ -8,8 +8,11 @@ import (
 	"subscription-service/internal/repository"
 	"subscription-service/internal/service"
 
+	_ "subscription-service/docs"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 func main() {
@@ -27,10 +30,16 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
+	r.Get("/subscriptions/total-cost", h.GetTotalCost)
 	r.Get("/health", h.HealthCheck)
-	r.Post("/subscriptions", h.CreateSubscription)
+	r.Get("/swagger/*", httpSwagger.WrapHandler)
+
 	r.Get("/subscriptions/{id}", h.GetSubscription)
+	r.Put("/subscriptions/{id}", h.UpdateSubscription)
+	r.Delete("/subscriptions/{id}", h.DeleteSubscription)
+
 	r.Get("/subscriptions", h.ListSubscriptions)
+	r.Post("/subscriptions", h.CreateSubscription)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -38,7 +47,5 @@ func main() {
 	}
 
 	log.Printf("🚀 Server starting on :%s", port)
-
 	log.Fatal(http.ListenAndServe(":"+port, r))
-
 }
